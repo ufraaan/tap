@@ -36,13 +36,32 @@ func main() {
 			addr := net.JoinHostPort(host, strconv.Itoa(p))
 			conn, err := net.DialTimeout("tcp", addr, 500*time.Millisecond)
 			if err == nil {
-				fmt.Printf("%d open\n", p)
+				name := serviceName(p)
+				if name != "" {
+					fmt.Printf("%d open (%s)\n", p, name)
+				} else {
+					fmt.Printf("%d open\n", p)
+				}
 				conn.Close()
 			}
 		}(port)
 	}
 
 	wg.Wait()
+}
+
+func serviceName(port int) string {
+	m := map[int]string{
+		20: "ftp-data", 21: "ftp", 22: "ssh", 23: "telnet",
+		25: "smtp", 53: "dns", 80: "http", 110: "pop3",
+		143: "imap", 443: "https", 465: "smtps", 587: "smtp",
+		993: "imaps", 995: "pop3s", 1433: "mssql", 1521: "oracle",
+		2049: "nfs", 2375: "docker", 2376: "docker-tls",
+		3306: "mysql", 3389: "rdp", 5432: "postgres",
+		6379: "redis", 6443: "https-alt", 8080: "http-alt",
+		8443: "https-alt", 9092: "kafka", 27017: "mongodb",
+	}
+	return m[port]
 }
 
 func parsePorts(s string) ([]int, error) {
